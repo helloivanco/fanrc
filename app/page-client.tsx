@@ -14,6 +14,7 @@ const ITEMS_PER_PAGE = 16;
 export const PageClient = ({ products }: { products: Product[] }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const [isFilterPaneOpen, setIsFilterPaneOpen] = useState(false);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const filterKeyRef = useRef('');
 
@@ -125,10 +126,15 @@ export const PageClient = ({ products }: { products: Product[] }) => {
         <h1 className='sr-only'>Fan RC - Premium RC Parts & Accessories</h1>
         {/* Search and Filters Section */}
         <div className='mb-10 space-y-6'>
-          <SearchBar value={searchQuery} onChange={setSearchQuery} />
+          <SearchBar 
+            value={searchQuery} 
+            onChange={setSearchQuery}
+            onFilterClick={() => setIsFilterPaneOpen(true)}
+            filterActiveCount={selectedTypes.length}
+          />
 
           <div className='grid gap-6 lg:grid-cols-4'>
-            <div className='lg:col-span-1'>
+            <div className='hidden lg:block lg:col-span-1'>
               <FilterBar
                 products={products}
                 selectedTypes={selectedTypes}
@@ -237,6 +243,59 @@ export const PageClient = ({ products }: { products: Product[] }) => {
           </div>
         </div>
       </main>
+
+      {/* Mobile Filter Pane */}
+      {isFilterPaneOpen && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 z-40 bg-black/50 transition-opacity duration-300 lg:hidden"
+            onClick={() => setIsFilterPaneOpen(false)}
+            aria-hidden="true"
+          />
+          {/* Filter Panel */}
+          <div className="fixed inset-y-0 right-0 z-50 w-full max-w-sm overflow-y-auto bg-white shadow-xl transition-transform duration-300 ease-in-out lg:hidden">
+            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-200 bg-white px-5 py-4">
+              <h2 className="text-lg font-semibold text-gray-900">Filters</h2>
+              <button
+                onClick={() => setIsFilterPaneOpen(false)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setIsFilterPaneOpen(false);
+                  }
+                }}
+                className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
+                aria-label="Close filters"
+                tabIndex={0}
+              >
+                <svg
+                  className="h-6 w-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+            <div className="p-5">
+              <FilterBar
+                products={products}
+                selectedTypes={selectedTypes}
+                onTypeChange={(types) => {
+                  setSelectedTypes(types);
+                }}
+              />
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Footer */}
       <footer className='mt-20 border-t border-gray-200 bg-white'>
