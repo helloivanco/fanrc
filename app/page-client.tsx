@@ -11,13 +11,11 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 const ITEMS_PER_PAGE = 16;
 
-export default function Home() {
+export const PageClient = ({ products }: { products: Product[] }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const filterKeyRef = useRef('');
-
-  const products = productsData as Product[];
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
@@ -265,4 +263,5 @@ export default function Home() {
       </footer>
     </div>
   );
-}
+};
+
