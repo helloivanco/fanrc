@@ -15,6 +15,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Fan RC - Premium RC Parts & Accessories",
   description: "Browse and shop premium RC parts and accessories from Fan RC. Search, filter, and create your wishlist.",
+  icons: {
+    icon: '/favicon-32x32.png',
+  },
 };
 
 export default function RootLayout({

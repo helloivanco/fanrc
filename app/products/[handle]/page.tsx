@@ -1,10 +1,11 @@
-import { Metadata } from 'next';
-import { notFound } from 'next/navigation';
-import Image from 'next/image';
-import Link from 'next/link';
+import { ProductDetails } from '@/components/ProductDetails';
+import { WishlistButton } from '@/components/WishlistButton';
 import productsData from '@/data/products.json';
 import { Product } from '@/types/product';
-import { ProductDetails } from '@/components/ProductDetails';
+import { Metadata } from 'next';
+import Image from 'next/image';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
 
 const products = productsData as Product[];
 
@@ -106,12 +107,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
   return (
     <div className='min-h-screen bg-gray-50'>
       {/* Header */}
-      <header className='sticky top-0 z-30 border-b border-gray-200 bg-[#fefa08] shadow-sm'>
-        <div className='mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8'>
+      <header className='sticky top-0 z-30 border-b border-gray-200/50 bg-[#fefa08] shadow-sm backdrop-blur-sm'>
+        <div className='mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8'>
           <div className='flex items-center justify-between'>
             <Link
               href='/'
-              className='flex items-center gap-3 transition-opacity hover:opacity-80'>
+              className='flex items-center gap-3 transition-opacity duration-200 hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 rounded-lg'>
               <Image
                 src='/fanrc-logo-transparent.png'
                 alt='Fan RC'
@@ -121,16 +122,66 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 priority
               />
             </Link>
-            <Link
-              href='/'
-              className='text-sm font-medium text-gray-900 hover:text-gray-700'>
-              ← Back to Products
-            </Link>
+            <div className='flex items-center gap-3'>
+              <Link
+                href='/'
+                className='flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-all duration-200 hover:border-gray-400 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-1'>
+                <svg
+                  className='h-4 w-4'
+                  fill='none'
+                  stroke='currentColor'
+                  viewBox='0 0 24 24'>
+                  <path
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                    strokeWidth={2}
+                    d='M10 19l-7-7m0 0l7-7m-7 7h18'
+                  />
+                </svg>
+                <span>Back</span>
+              </Link>
+              <WishlistButton products={products} />
+            </div>
           </div>
         </div>
       </header>
 
-      <main className='mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8'>
+      <main className='mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8'>
+        <script
+          type='application/ld+json'
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'Product',
+              name: product.title,
+              description: product.description_text || product.title,
+              image: product.featured_image_local
+                ? getCloudinaryUrl(product.featured_image_local)
+                : getImageUrl(
+                    product.featured_image || product.images[0] || ''
+                  ),
+              brand: {
+                '@type': 'Brand',
+                name: product.vendor,
+              },
+              offers: {
+                '@type': 'AggregateOffer',
+                priceCurrency: 'USD',
+                lowPrice: (
+                  Math.min(...product.variants.map((v) => v.price)) / 100
+                ).toFixed(2),
+                highPrice: (
+                  Math.max(...product.variants.map((v) => v.price)) / 100
+                ).toFixed(2),
+                availability: product.variants.some((v) => v.available)
+                  ? 'https://schema.org/InStock'
+                  : 'https://schema.org/OutOfStock',
+                url: product.url,
+              },
+              category: product.product_type,
+            }),
+          }}
+        />
         <ProductDetails product={product} />
       </main>
 
@@ -186,4 +237,3 @@ export default async function ProductPage({ params }: ProductPageProps) {
     </div>
   );
 }
-

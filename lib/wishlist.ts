@@ -74,7 +74,7 @@ export const formatWishlistForMessenger = (items: WishlistItem[], products: any[
       message += `  SKU: ${variant?.sku || product.variants[0].sku}\n`;
       message += `  Quantity: ${item.quantity}\n`;
       message += `  Price: $${price}\n`;
-      message += `  URL: ${product.url}\n\n`;
+      message += `  URL: https://fanrc.com/products/${product.handle}\n\n`;
     }
   });
 

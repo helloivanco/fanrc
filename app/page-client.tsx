@@ -4,9 +4,9 @@ import { FilterBar } from '@/components/FilterBar';
 import { ProductCard } from '@/components/ProductCard';
 import { SearchBar } from '@/components/SearchBar';
 import { WishlistButton } from '@/components/WishlistButton';
-import productsData from '@/data/products.json';
 import { Product } from '@/types/product';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 const ITEMS_PER_PAGE = 16;
@@ -101,10 +101,12 @@ export const PageClient = ({ products }: { products: Product[] }) => {
   return (
     <div className='min-h-screen bg-gray-50'>
       {/* Header */}
-      <header className='sticky top-0 z-30 border-b border-gray-200 bg-[#fefa08] shadow-sm'>
-        <div className='mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8'>
+      <header className='sticky top-0 z-30 border-b border-gray-200/50 bg-[#fefa08] shadow-sm backdrop-blur-sm'>
+        <div className='mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8'>
           <div className='flex items-center justify-between'>
-            <div className='flex items-center gap-3'>
+            <Link
+              href='/'
+              className='flex items-center gap-3 transition-opacity duration-200 hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 rounded-lg'>
               <Image
                 src='/fanrc-logo-transparent.png'
                 alt='Fan RC'
@@ -113,18 +115,19 @@ export const PageClient = ({ products }: { products: Product[] }) => {
                 className='h-auto w-auto'
                 priority
               />
-            </div>
+            </Link>
             <WishlistButton products={products} />
           </div>
         </div>
       </header>
 
-      <main className='mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8'>
+      <main className='mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8'>
+        <h1 className='sr-only'>Fan RC - Premium RC Parts & Accessories</h1>
         {/* Search and Filters Section */}
-        <div className='mb-8 space-y-4'>
+        <div className='mb-10 space-y-6'>
           <SearchBar value={searchQuery} onChange={setSearchQuery} />
 
-          <div className='grid gap-4 lg:grid-cols-4'>
+          <div className='grid gap-6 lg:grid-cols-4'>
             <div className='lg:col-span-1'>
               <FilterBar
                 products={products}
@@ -135,12 +138,13 @@ export const PageClient = ({ products }: { products: Product[] }) => {
 
             {/* Products Grid */}
             <div className='lg:col-span-3'>
-              <div className='mb-4 flex items-center justify-between'>
-                <p className='text-sm text-gray-600'>
-                  Showing {displayedProducts.length} of{' '}
-                  {filteredProducts.length} products
-                  {filteredProducts.length !== products.length &&
-                    ` (${products.length} total)`}
+              <div className='mb-6 flex flex-wrap items-center justify-between gap-4'>
+                <p className='text-sm font-medium text-gray-600'>
+                  Showing <span className='font-semibold text-gray-900'>{displayedProducts.length}</span> of{' '}
+                  <span className='font-semibold text-gray-900'>{filteredProducts.length}</span> products
+                  {filteredProducts.length !== products.length && (
+                    <span className='text-gray-500'> ({products.length} total)</span>
+                  )}
                 </p>
                 {(searchQuery || selectedTypes.length > 0) && (
                   <button
@@ -148,32 +152,54 @@ export const PageClient = ({ products }: { products: Product[] }) => {
                       setSearchQuery('');
                       setSelectedTypes([]);
                     }}
-                    className='text-sm font-medium text-gray-900 hover:text-gray-700'>
-                    Clear all filters
+                    className='flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-all duration-200 hover:border-gray-400 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-1'>
+                    <svg
+                      className='h-4 w-4'
+                      fill='none'
+                      stroke='currentColor'
+                      viewBox='0 0 24 24'>
+                      <path
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                        strokeWidth={2}
+                        d='M6 18L18 6M6 6l12 12'
+                      />
+                    </svg>
+                    Clear filters
                   </button>
                 )}
               </div>
 
               {filteredProducts.length === 0 ? (
-                <div className='rounded-lg border border-gray-200 bg-white p-12 text-center'>
+                <div className='rounded-2xl border border-gray-200 bg-white p-16 text-center shadow-sm'>
                   <svg
-                    className='mx-auto h-12 w-12 text-gray-400'
+                    className='mx-auto h-16 w-16 text-gray-300'
                     fill='none'
                     stroke='currentColor'
                     viewBox='0 0 24 24'>
                     <path
                       strokeLinecap='round'
                       strokeLinejoin='round'
-                      strokeWidth={2}
+                      strokeWidth={1.5}
                       d='M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
                     />
                   </svg>
-                  <h3 className='mt-4 text-lg font-semibold text-gray-900'>
+                  <h3 className='mt-6 text-xl font-semibold text-gray-900'>
                     No products found
                   </h3>
-                  <p className='mt-2 text-sm text-gray-600'>
-                    Try adjusting your search or filters
+                  <p className='mt-2 text-sm text-gray-500'>
+                    Try adjusting your search or filters to find what you're looking for
                   </p>
+                  {(searchQuery || selectedTypes.length > 0) && (
+                    <button
+                      onClick={() => {
+                        setSearchQuery('');
+                        setSelectedTypes([]);
+                      }}
+                      className='mt-6 inline-flex items-center gap-2 rounded-xl bg-gray-900 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-gray-800 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2'>
+                      Clear all filters
+                    </button>
+                  )}
                 </div>
               ) : (
                 <>
@@ -185,8 +211,8 @@ export const PageClient = ({ products }: { products: Product[] }) => {
                   {hasMore && (
                     <div
                       ref={loadMoreRef}
-                      className='mt-8 flex items-center justify-center py-8'>
-                      <div className='flex items-center gap-2 text-gray-500'>
+                      className='mt-10 flex items-center justify-center py-12'>
+                      <div className='flex items-center gap-3 text-gray-500'>
                         <svg
                           className='h-5 w-5 animate-spin'
                           fill='none'
@@ -199,7 +225,7 @@ export const PageClient = ({ products }: { products: Product[] }) => {
                             d='M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15'
                           />
                         </svg>
-                        <span className='text-sm'>
+                        <span className='text-sm font-medium'>
                           Loading more products...
                         </span>
                       </div>
@@ -213,17 +239,17 @@ export const PageClient = ({ products }: { products: Product[] }) => {
       </main>
 
       {/* Footer */}
-      <footer className='mt-16 border-t border-gray-200 bg-white'>
-        <div className='mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8'>
+      <footer className='mt-20 border-t border-gray-200 bg-white'>
+        <div className='mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8'>
           <div className='text-center'>
-            <div className='flex flex-wrap items-center justify-center gap-6'>
+            <div className='flex flex-wrap items-center justify-center gap-4'>
               <a
                 href='https://www.facebook.com/profile.php?id=100082969317056'
                 target='_blank'
                 rel='noopener noreferrer'
-                className='group flex items-center gap-3 rounded-lg bg-[#1877F2] px-4 py-3 transition-all hover:bg-[#166FE5] hover:shadow-lg'>
+                className='group flex items-center gap-3 rounded-xl bg-[#1877F2] px-5 py-3 font-semibold text-white shadow-lg transition-all duration-200 hover:bg-[#166FE5] hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-[#1877F2] focus:ring-offset-2'>
                 <svg
-                  className='h-8 w-8 text-white'
+                  className='h-6 w-6 text-white'
                   fill='currentColor'
                   viewBox='0 0 24 24'
                   aria-hidden='true'>
@@ -233,17 +259,15 @@ export const PageClient = ({ products }: { products: Product[] }) => {
                     clipRule='evenodd'
                   />
                 </svg>
-                <span className='font-semibold text-white'>
-                  Fan RC Facebook
-                </span>
+                <span>Fan RC</span>
               </a>
               <a
                 href='https://www.facebook.com/groups/1391343472430150'
                 target='_blank'
                 rel='noopener noreferrer'
-                className='group flex items-center gap-3 rounded-lg bg-[#1877F2] px-4 py-3 transition-all hover:bg-[#166FE5] hover:shadow-lg'>
+                className='group flex items-center gap-3 rounded-xl bg-[#1877F2] px-5 py-3 font-semibold text-white shadow-lg transition-all duration-200 hover:bg-[#166FE5] hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-[#1877F2] focus:ring-offset-2'>
                 <svg
-                  className='h-8 w-8 text-white'
+                  className='h-6 w-6 text-white'
                   fill='currentColor'
                   viewBox='0 0 24 24'
                   aria-hidden='true'>
@@ -253,9 +277,7 @@ export const PageClient = ({ products }: { products: Product[] }) => {
                     clipRule='evenodd'
                   />
                 </svg>
-                <span className='font-semibold text-white'>
-                  Fan RC Owners Group
-                </span>
+                <span>Fan RC Owners Group</span>
               </a>
             </div>
           </div>
@@ -264,4 +286,3 @@ export const PageClient = ({ products }: { products: Product[] }) => {
     </div>
   );
 };
-
