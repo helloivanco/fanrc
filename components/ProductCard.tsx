@@ -18,18 +18,20 @@ const formatPrice = (cents: number): string => {
   return `$${(cents / 100).toFixed(2)}`;
 };
 
-const getCloudinaryUrl = (filename: string | undefined): string => {
+const getLocalImageUrl = (filename: string | undefined): string => {
   if (!filename) return '';
-  const baseUrl =
-    'https://res.cloudinary.com/marketahead/image/upload/v1764917401/fanrc';
-  // Remove /media/ prefix if present
-  const cleanFilename = filename.startsWith('media/')
-    ? filename.replace('media/', '')
-    : filename;
-  return `${baseUrl}/${cleanFilename}`;
+
+  const withoutLeadingSlashes = filename.replace(/^\/+/, '');
+  const cleanFilename = withoutLeadingSlashes.replace(/^media\//, '');
+  return `/images/${cleanFilename}`;
 };
 
 const getImageUrl = (imageUrl: string): string => {
+  if (!imageUrl) return '';
+
+  if (imageUrl.startsWith('/')) {
+    return imageUrl;
+  }
   if (imageUrl.startsWith('//')) {
     return `https:${imageUrl}`;
   }
@@ -72,7 +74,6 @@ export const ProductCard = ({
     }
   };
 
-
   const handleWishlistKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
@@ -81,7 +82,9 @@ export const ProductCard = ({
   };
 
   const imageUrl = product.featured_image_local
-    ? getCloudinaryUrl(product.featured_image_local)
+    ? getLocalImageUrl(product.featured_image_local)
+    : product.images_local && product.images_local.length > 0
+    ? getLocalImageUrl(product.images_local[0])
     : getImageUrl(product.featured_image || product.images[0] || '');
   const minPrice = Math.min(...product.variants.map((v) => v.price));
   const maxPrice = Math.max(...product.variants.map((v) => v.price));
@@ -135,7 +138,9 @@ export const ProductCard = ({
               : 'bg-white/95 text-gray-600 hover:bg-white focus:ring-gray-900'
           }`}>
           <svg
-            className={`h-5 w-5 transition-transform duration-200 ${isWishlisted ? 'fill-current scale-110' : ''}`}
+            className={`h-5 w-5 transition-transform duration-200 ${
+              isWishlisted ? 'fill-current scale-110' : ''
+            }`}
             fill='none'
             stroke='currentColor'
             viewBox='0 0 24 24'>

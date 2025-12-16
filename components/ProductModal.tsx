@@ -18,18 +18,19 @@ const formatPrice = (cents: number): string => {
   return `$${(cents / 100).toFixed(2)}`;
 };
 
-const getCloudinaryUrl = (filename: string | undefined): string => {
+const getLocalImageUrl = (filename: string | undefined): string => {
   if (!filename) return '';
-  const baseUrl =
-    'https://res.cloudinary.com/marketahead/image/upload/v1764917401/fanrc';
-  // Remove /media/ prefix if present
-  const cleanFilename = filename.startsWith('media/')
-    ? filename.replace('media/', '')
-    : filename;
-  return `${baseUrl}/${cleanFilename}`;
+  const withoutLeadingSlashes = filename.replace(/^\/+/, '');
+  const cleanFilename = withoutLeadingSlashes.replace(/^media\//, '');
+  return `/images/${cleanFilename}`;
 };
 
-const getImageUrl = (imageUrl: string): string => {
+const getExternalImageUrl = (imageUrl: string): string => {
+  if (!imageUrl) return '';
+
+  if (imageUrl.startsWith('/')) {
+    return imageUrl;
+  }
   if (imageUrl.startsWith('//')) {
     return `https:${imageUrl}`;
   }
@@ -76,15 +77,32 @@ export const ProductModal = ({
   };
 
   const allImages = (() => {
-    if (product.images_local && product.images_local.length > 0) {
-      return product.images_local.map((filename) => getCloudinaryUrl(filename));
+    const localImages: string[] = [];
+
+    if (product.featured_image_local) {
+      localImages.push(getLocalImageUrl(product.featured_image_local));
     }
-    const featured = product.featured_image_local
-      ? getCloudinaryUrl(product.featured_image_local)
-      : product.featured_image;
-    const otherImages = product.images.filter(
-      (img) => img !== product.featured_image
-    );
+
+    if (product.images_local && product.images_local.length > 0) {
+      for (const filename of product.images_local) {
+        const url = getLocalImageUrl(filename);
+        if (!localImages.includes(url)) {
+          localImages.push(url);
+        }
+      }
+    }
+
+    if (localImages.length > 0) {
+      return localImages;
+    }
+
+    const featured = product.featured_image
+      ? getExternalImageUrl(product.featured_image)
+      : '';
+    const otherImages = product.images
+      .filter((img) => img !== product.featured_image)
+      .map((img) => getExternalImageUrl(img));
+
     return [featured, ...otherImages].filter(Boolean);
   })();
 

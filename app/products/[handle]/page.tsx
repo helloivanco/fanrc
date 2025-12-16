@@ -9,17 +9,18 @@ import { notFound } from 'next/navigation';
 
 const products = productsData as Product[];
 
-const getCloudinaryUrl = (filename: string | undefined): string => {
+const getLocalImageUrl = (filename: string | undefined): string => {
   if (!filename) return '';
-  const baseUrl =
-    'https://res.cloudinary.com/marketahead/image/upload/v1764917401/fanrc';
-  const cleanFilename = filename.startsWith('media/')
-    ? filename.replace('media/', '')
-    : filename;
-  return `${baseUrl}/${cleanFilename}`;
+  const cleanFilename = filename.replace(/^\/+/, '');
+  return `/images/${cleanFilename}`;
 };
 
 const getImageUrl = (imageUrl: string): string => {
+  if (!imageUrl) return '';
+
+  if (imageUrl.startsWith('/')) {
+    return imageUrl;
+  }
   if (imageUrl.startsWith('//')) {
     return `https:${imageUrl}`;
   }
@@ -51,9 +52,12 @@ export async function generateMetadata({
     };
   }
 
-  const imageUrl = product.featured_image_local
-    ? getCloudinaryUrl(product.featured_image_local)
-    : getImageUrl(product.featured_image || product.images[0] || '');
+  const imageUrl =
+    product.featured_image_local
+      ? getLocalImageUrl(product.featured_image_local)
+      : product.images_local && product.images_local.length > 0
+      ? getLocalImageUrl(product.images_local[0])
+      : getImageUrl(product.featured_image || product.images[0] || '');
 
   const minPrice = Math.min(...product.variants.map((v) => v.price));
   const maxPrice = Math.max(...product.variants.map((v) => v.price));
@@ -155,11 +159,14 @@ export default async function ProductPage({ params }: ProductPageProps) {
               '@type': 'Product',
               name: product.title,
               description: product.description_text || product.title,
-              image: product.featured_image_local
-                ? getCloudinaryUrl(product.featured_image_local)
-                : getImageUrl(
-                    product.featured_image || product.images[0] || ''
-                  ),
+              image:
+                product.featured_image_local
+                  ? getLocalImageUrl(product.featured_image_local)
+                  : product.images_local && product.images_local.length > 0
+                  ? getLocalImageUrl(product.images_local[0])
+                  : getImageUrl(
+                      product.featured_image || product.images[0] || ''
+                    ),
               brand: {
                 '@type': 'Brand',
                 name: product.vendor,
